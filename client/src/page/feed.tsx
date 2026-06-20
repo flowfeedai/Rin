@@ -44,6 +44,7 @@ export function FeedPage({ id, TOC, clean }: { id: string, TOC: () => JSX.Elemen
   const [top, setTop] = useState<number>(0);
   const config = useContext(ClientConfigContext);
   const counterEnabled = config.getBoolean('counter.enabled');
+  const aiSummaryEnabled = config.getBoolean('ai_summary.enabled');
   const hasAISummary = Boolean(feed?.ai_summary?.trim());
   const showAISummaryState = feed?.ai_summary_status === "pending" || feed?.ai_summary_status === "processing" || feed?.ai_summary_status === "failed";
   function deleteFeed() {
@@ -255,7 +256,7 @@ export function FeedPage({ id, TOC, clean }: { id: string, TOC: () => JSX.Elemen
                     )}
                   </div>
                 </div>
-                {(hasAISummary || showAISummaryState) && (
+                {aiSummaryEnabled && (hasAISummary || showAISummaryState) && (
                   <div className="my-4 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-100 dark:border-purple-800/30">
                     <div className="flex items-center justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2">
