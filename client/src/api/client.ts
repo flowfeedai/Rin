@@ -615,8 +615,10 @@ class WordPressAPI {
   constructor(private http: HttpClient) {}
 
   // POST /api/wp
-  async import(xml: string): Promise<ApiResponse<{ imported: number }>> {
-    return this.http.post<{ imported: number }>("/api/wp", { xml });
+  async import(file: File): Promise<ApiResponse<{ success: number; skipped: number; skippedList: Array<{ title: string; reason: string }> }>> {
+    const formData = new FormData();
+    formData.append("data", file);
+    return this.http.post<{ success: number; skipped: number; skippedList: Array<{ title: string; reason: string }> }>("/api/wp", formData);
   }
 }
 

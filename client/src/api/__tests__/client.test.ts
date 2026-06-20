@@ -277,6 +277,33 @@ describe('API Client', () => {
     })
   })
 
+  describe('WordPress API', () => {
+    it('should upload import files as multipart form data using the data field', async () => {
+      const mockResponse = { success: 3, skipped: 0, skippedList: [] }
+      const file = new File(['<rss><channel></channel></rss>'], 'wordpress.xml', { type: 'text/xml' })
+
+      mockFetch.mockResolvedValueOnce(createMockResponse({
+        ok: true,
+        headers: new Map([['content-type', 'application/json']]),
+        json: async () => mockResponse,
+      }))
+
+      const result = await api.wp.import(file)
+
+      expect(result.data).toEqual(mockResponse)
+      expect(mockFetch).toHaveBeenCalledWith(
+        'http://localhost/api/wp',
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.any(FormData),
+        })
+      )
+      const [, options] = mockFetch.mock.calls[0]
+      expect(options.headers).not.toHaveProperty('Content-Type')
+      expect(options.body.get('data')).toBe(file)
+    })
+  })
+
   describe('Error handling', () => {
     it('should handle network errors', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'))

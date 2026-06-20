@@ -143,8 +143,8 @@ export function Settings() {
     if (file) {
       const { data, error } = await importWordPressFile(file);
       if (data) {
-        setMsg(t("settings.import_success$success$skipped", { success: data.imported, skipped: 0 }));
-        setMsgList([]);
+        setMsg(t("settings.import_success$success$skipped", { success: data.success, skipped: data.skipped }));
+        setMsgList(data.skippedList ?? []);
         setIsOpen(true);
       } else if (error) {
         showAlert(t("settings.import_failed$message", { message: error.value }));

@@ -106,8 +106,7 @@ export async function uploadFavicon(file: File, t: TFunction, showAlert: (messag
 }
 
 export async function importWordPressFile(file: File) {
-  const xmlContent = await file.text();
-  return client.wp.import(xmlContent);
+  return client.wp.import(file);
 }
 
 export function buildAIConfigUpdates(updates: Record<string, unknown>) {
