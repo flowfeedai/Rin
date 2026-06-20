@@ -25,6 +25,31 @@ async function initWPModules() {
     }
 }
 
+function buildImportedSummary(content: string) {
+    const contentWithoutImages = content
+        .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+        .replace(/!\\\[[^\]]*\\\]\([^)]*\)/g, "")
+        .replace(/<img\b[^>]*>/gi, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    return contentWithoutImages.length > 100 ? contentWithoutImages.slice(0, 100) : contentWithoutImages;
+}
+
+function isMarkdownImportContent(content: string) {
+    const trimmed = content.trim();
+    if (!trimmed) {
+        return false;
+    }
+    if (/<[a-z][\s\S]*>/i.test(trimmed)) {
+        return false;
+    }
+    return true;
+}
+
+function buildImportedContent(contentHtml: string) {
+    return isMarkdownImportContent(contentHtml) ? contentHtml.trim() : html2md(contentHtml);
+}
+
 export function FeedService(): Hono<{
     Bindings: Env;
     Variables: Variables;
@@ -588,8 +613,8 @@ export function WordPressService(): Hono<{
             const updatedAt = new Date(item?.['wp:post_modified']);
             const draft = item?.['wp:status'] !== 'publish';
             const contentHtml = item?.['content:encoded'];
-            const content = html2md(contentHtml);
-            const summary = content.length > 100 ? content.slice(0, 100) : content;
+            const content = buildImportedContent(contentHtml);
+            const summary = buildImportedSummary(content);
             let tags = item?.['category'];
 
             if (tags && Array.isArray(tags)) {

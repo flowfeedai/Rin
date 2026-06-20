@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
-import { FeedService } from '../feed';
+import { FeedService, WordPressService } from '../feed';
 import { Hono } from "hono";
 import type { Variables } from "../../core/hono-types";
 import { setupTestApp, createTestUser, cleanupTestDB } from '../../../tests/fixtures';
@@ -464,5 +464,148 @@ describe('FeedService', () => {
 
             expect(res.status).toBe(404);
         });
+    });
+});
+
+describe('WordPressService', () => {
+    let sqlite: Database;
+    let env: Env;
+    let app: Hono<{ Bindings: Env; Variables: Variables }>;
+
+    beforeEach(async () => {
+        const ctx = await setupTestApp(WordPressService);
+        sqlite = ctx.sqlite;
+        env = ctx.env;
+        app = ctx.app;
+
+        await createTestUser(sqlite);
+    });
+
+    afterEach(() => {
+        cleanupTestDB(sqlite);
+    });
+
+    it('should exclude imported leading images from generated summaries', async () => {
+        const formData = new FormData();
+        formData.append('data', new File([
+            `<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:wp="http://wordpress.org/export/1.2/">
+<channel>
+  <item>
+    <title>Imported Post</title>
+    <content:encoded><![CDATA[<p><img src="https://image.example.com/a.jpeg#width=1300&height=750" alt="" /></p><p>今天是农历八月十五，一个团圆的日子。</p>]]></content:encoded>
+    <wp:post_date>2025-01-01 00:00:00</wp:post_date>
+    <wp:post_modified>2025-01-01 00:00:00</wp:post_modified>
+    <wp:status>publish</wp:status>
+  </item>
+  <item>
+    <title>Second Imported Post</title>
+    <content:encoded><![CDATA[<p>另一篇文章。</p>]]></content:encoded>
+    <wp:post_date>2025-01-02 00:00:00</wp:post_date>
+    <wp:post_modified>2025-01-02 00:00:00</wp:post_modified>
+    <wp:status>publish</wp:status>
+  </item>
+</channel>
+</rss>`
+        ], 'wordpress.xml', { type: 'text/xml' }));
+
+        const res = await app.request('/', {
+            method: 'POST',
+            headers: {
+                Authorization: 'Bearer mock_token_1',
+            },
+            body: formData,
+        }, env);
+
+        expect(res.status).toBe(200);
+        const imported = sqlite.query('SELECT content, summary FROM feeds WHERE title = ?').get('Imported Post') as { content: string; summary: string };
+        expect(imported.content).toStartWith('![](https://image.example.com/a.jpeg#width=1300&height=750)');
+        expect(imported.summary).toBe('今天是农历八月十五，一个团圆的日子。');
+    });
+
+    it('should preserve markdown content from imported XML', async () => {
+        const formData = new FormData();
+        formData.append('data', new File([
+            `<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:wp="http://wordpress.org/export/1.2/">
+<channel>
+  <item>
+    <title>Markdown Imported Post</title>
+    <content:encoded><![CDATA[![](https://image.example.com/a.jpeg#width=1300&height=750)
+
+今天是农历八月十五，一个团圆的日子。]]></content:encoded>
+    <wp:post_date>2025-01-01 00:00:00</wp:post_date>
+    <wp:post_modified>2025-01-01 00:00:00</wp:post_modified>
+    <wp:status>publish</wp:status>
+  </item>
+  <item>
+    <title>Second Markdown Imported Post</title>
+    <content:encoded><![CDATA[另一篇文章。]]></content:encoded>
+    <wp:post_date>2025-01-02 00:00:00</wp:post_date>
+    <wp:post_modified>2025-01-02 00:00:00</wp:post_modified>
+    <wp:status>publish</wp:status>
+  </item>
+</channel>
+</rss>`
+        ], 'wordpress.xml', { type: 'text/xml' }));
+
+        const res = await app.request('/', {
+            method: 'POST',
+            headers: {
+                Authorization: 'Bearer mock_token_1',
+            },
+            body: formData,
+        }, env);
+
+        expect(res.status).toBe(200);
+        const imported = sqlite.query('SELECT content, summary FROM feeds WHERE title = ?').get('Markdown Imported Post') as { content: string; summary: string };
+        expect(imported.content).toStartWith('![](https://image.example.com/a.jpeg#width=1300&height=750)');
+        expect(imported.content).not.toInclude('!\\[\\]');
+        expect(imported.summary).toBe('今天是农历八月十五，一个团圆的日子。');
+    });
+
+    it('should convert HTML even when it contains markdown-looking image text', async () => {
+        const formData = new FormData();
+        formData.append('data', new File([
+            `<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:wp="http://wordpress.org/export/1.2/">
+<channel>
+  <item>
+    <title>Mixed Imported Post</title>
+    <content:encoded><![CDATA[<p>![](https://image.example.com/a.jpeg#width=1300&height=750)</p><p>Body text</p>]]></content:encoded>
+    <wp:post_date>2025-01-01 00:00:00</wp:post_date>
+    <wp:post_modified>2025-01-01 00:00:00</wp:post_modified>
+    <wp:status>publish</wp:status>
+  </item>
+  <item>
+    <title>Second Mixed Imported Post</title>
+    <content:encoded><![CDATA[<p>另一篇文章。</p>]]></content:encoded>
+    <wp:post_date>2025-01-02 00:00:00</wp:post_date>
+    <wp:post_modified>2025-01-02 00:00:00</wp:post_modified>
+    <wp:status>publish</wp:status>
+  </item>
+</channel>
+</rss>`
+        ], 'wordpress.xml', { type: 'text/xml' }));
+
+        const res = await app.request('/', {
+            method: 'POST',
+            headers: {
+                Authorization: 'Bearer mock_token_1',
+            },
+            body: formData,
+        }, env);
+
+        expect(res.status).toBe(200);
+        const imported = sqlite.query('SELECT content, summary FROM feeds WHERE title = ?').get('Mixed Imported Post') as { content: string; summary: string };
+        expect(imported.content).not.toInclude('<p>');
+        expect(imported.content).toInclude('Body text');
+        expect(imported.summary).toBe('Body text');
     });
 });
