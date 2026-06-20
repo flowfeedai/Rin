@@ -28,7 +28,7 @@
     "build": "bun run build:client && bun run build:server",
     "build:all": "turbo build",
     "build:client": "bun --filter './client' build",
-    "build:server": "mkdir -p ./dist/server && bunx wrangler deploy --dry-run --outdir=dist/server",
+    "build:server": "bun cli/bin/rin.ts setup-dev >/tmp/rin-setup-dev.log 2>&1 && mkdir -p ./dist/server && bunx wrangler deploy --dry-run --outdir=dist/server",
     "i18n:extract": "bun --filter './client' i18n",
     "clean": "rm -rf dist node_modules client/node_modules server/node_modules .turbo wrangler.toml client/.env .dev.vars",
     "format:check": "turbo format:check",
@@ -37,6 +37,6 @@
   },
   "devDependencies": {
     "turbo": "^1.13.3",
-    "wrangler": "4.71.0"
+    "wrangler": "4.103.0"
   }
 }
