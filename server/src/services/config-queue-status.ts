@@ -76,6 +76,7 @@ export async function deleteQueueStatusTask(
   await db
     .update(feeds)
     .set({
+      ai_summary: "",
       ai_summary_status: "idle",
       ai_summary_error: "",
     })

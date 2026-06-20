@@ -216,7 +216,7 @@
     "empty_description": "当前没有排队中或最近处理过的 AI 摘要任务。",
     "empty_title": "暂无队列活动",
     "delete": "删除",
-    "delete_confirm_description": "确定删除 Feed #{{id}} 的队列任务记录吗？",
+    "delete_confirm_description": "确定删除 Feed #{{id}} 的队列任务记录和已生成的 AI 摘要吗？",
     "delete_confirm_title": "删除队列任务记录",
     "delete_success": "队列任务记录已删除",
     "deleting": "删除中",

@@ -216,7 +216,7 @@
     "empty_description": "No AI summary tasks are currently queued or recently processed.",
     "empty_title": "No queue activity",
     "delete": "Delete",
-    "delete_confirm_description": "Delete the queue task record for Feed #{{id}}?",
+    "delete_confirm_description": "Delete the queue task record and generated AI summary for Feed #{{id}}?",
     "delete_confirm_title": "Delete queue task record",
     "delete_success": "Queue task record deleted",
     "deleting": "Deleting",

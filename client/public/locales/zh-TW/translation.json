@@ -216,7 +216,7 @@
     "empty_description": "目前沒有排隊中或最近處理過的 AI 摘要任務。",
     "empty_title": "暫無佇列活動",
     "delete": "刪除",
-    "delete_confirm_description": "確定刪除 Feed #{{id}} 的佇列任務記錄嗎？",
+    "delete_confirm_description": "確定刪除 Feed #{{id}} 的佇列任務記錄和已生成的 AI 摘要嗎？",
     "delete_confirm_title": "刪除佇列任務記錄",
     "delete_success": "佇列任務記錄已刪除",
     "deleting": "刪除中",

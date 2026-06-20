@@ -207,7 +207,7 @@
     "empty_description": "現在キュー中、または最近処理された AI 要約タスクはありません。",
     "empty_title": "キューアクティビティなし",
     "delete": "削除",
-    "delete_confirm_description": "Feed #{{id}} のキュータスク記録を削除しますか？",
+    "delete_confirm_description": "Feed #{{id}} のキュータスク記録と生成済み AI 要約を削除しますか？",
     "delete_confirm_title": "キュータスク記録を削除",
     "delete_success": "キュータスク記録を削除しました",
     "deleting": "削除中",

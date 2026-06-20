@@ -439,7 +439,8 @@ describe("ConfigService", () => {
 
             expect(res.status).toBe(200);
 
-            const row = sqlite.prepare("SELECT ai_summary_status, ai_summary_error FROM feeds WHERE id = 1").get() as any;
+            const row = sqlite.prepare("SELECT ai_summary, ai_summary_status, ai_summary_error FROM feeds WHERE id = 1").get() as any;
+            expect(row.ai_summary).toBe("");
             expect(row.ai_summary_status).toBe("idle");
             expect(row.ai_summary_error).toBe("");
         });
