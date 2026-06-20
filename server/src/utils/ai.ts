@@ -27,7 +27,7 @@ export const WORKER_AI_MODELS: Record<string, string> = {
 };
 
 export const AI_SUMMARY_SYSTEM_PROMPT =
-    "你是一个中文内容摘要助手。请用简洁、准确、自然的中文总结用户提供的内容，不超过200字，不要添加原文没有的信息，不要输出标题或项目符号。";
+    "你是一个中文内容摘要助手。请用简洁、准确、自然的中文总结用户提供的内容，不超过100字，不要添加原文没有的信息，不要输出标题或项目符号。";
 
 /**
  * Get full Worker AI model ID from short name
