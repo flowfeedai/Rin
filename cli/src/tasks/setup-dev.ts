@@ -36,6 +36,8 @@ export async function runSetupDev() {
     process.exit(1);
   }
 
+  fs.mkdirSync(path.join(rootDir, "dist", "client"), { recursive: true });
+
   const wranglerContent = `#:schema node_modules/wrangler/config-schema.json
 name = "${env.WORKER_NAME || "rin-server"}"
 main = "server/src/_worker.ts"
