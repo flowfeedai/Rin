@@ -36,4 +36,10 @@ describe("buildExternalAIChatCompletionsUrl", () => {
             "https://api.openai.com/v1/chat/completions",
         );
     });
+
+    it("falls back to DashScope OpenAI-compatible preset when api URL is empty", () => {
+        expect(buildExternalAIChatCompletionsUrl("dashscope", "")).toBe(
+            "https://dashscope-us.aliyuncs.com/compatible-mode/v1/chat/completions",
+        );
+    });
 });
