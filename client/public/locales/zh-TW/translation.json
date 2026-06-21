@@ -277,6 +277,12 @@
         "title": "啟用訪問量統計"
       }
     },
+    "registration": {
+      "enable": {
+        "desc": "關閉後登入頁僅保留使用者名稱密碼登入，並隱藏 GitHub 登入入口。",
+        "title": "開放註冊"
+      }
+    },
     "favicon": {
       "desc": "設定顯示於瀏覽器的地址欄的圖標（Favicon）",
       "title": "網站圖標",

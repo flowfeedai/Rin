@@ -12,12 +12,40 @@ import {
     NotFoundError
 } from "../errors";
 
+function toBoolean(value: unknown) {
+    if (typeof value === "boolean") {
+        return value;
+    }
+
+    if (typeof value === "string") {
+        const normalized = value.trim().toLowerCase();
+        if (normalized === "true") return true;
+        if (normalized === "false") return false;
+    }
+
+    if (typeof value === "number") {
+        return value !== 0;
+    }
+
+    return Boolean(value);
+}
+
+async function ensureRegistrationEnabled(c: AppContext, timingName: string) {
+    const clientConfig = c.get('clientConfig');
+    const registrationEnabled = await profileAsync(c, timingName, () => clientConfig.getOrDefault('registration.enabled', true));
+
+    if (!toBoolean(registrationEnabled)) {
+        throw new ForbiddenError('Registration is disabled');
+    }
+}
+
 export function UserService(): Hono {
     const app = new Hono();
 
     // GET /user/github - Redirect to GitHub OAuth
     app.get("/github", async (c: AppContext) => {
         const oauth2 = c.get('oauth2');
+        await ensureRegistrationEnabled(c, 'user_github_registration_config');
 
         if (!oauth2) {
             throw new BadRequestError('GitHub OAuth is not configured');
@@ -50,6 +78,7 @@ export function UserService(): Hono {
         const oauth2 = c.get('oauth2');
         const jwt = c.get('jwt');
         const db = c.get('db');
+        await ensureRegistrationEnabled(c, 'user_github_callback_registration_config');
 
         if (!oauth2) {
             throw new BadRequestError('GitHub OAuth is not configured');

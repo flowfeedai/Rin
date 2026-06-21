@@ -277,6 +277,12 @@
         "title": "Enable traffic statistics"
       }
     },
+    "registration": {
+      "enable": {
+        "desc": "When disabled, the login page only keeps username/password login and hides GitHub login.",
+        "title": "Open registration"
+      }
+    },
     "favicon": {
       "desc": "Set the icon (Favicon) displayed in the browser's address bar",
       "title": "Favicon",

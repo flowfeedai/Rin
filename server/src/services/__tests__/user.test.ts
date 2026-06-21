@@ -11,6 +11,7 @@ describe('UserService', () => {
     let sqlite: Database;
     let env: Env;
     let app: Hono<{ Bindings: Env; Variables: Variables }>;
+    let clientConfig: TestCacheImpl;
 
     beforeEach(async () => {
         const ctx = await setupTestApp(UserService);
@@ -18,6 +19,7 @@ describe('UserService', () => {
         sqlite = ctx.sqlite;
         env = ctx.env;
         app = ctx.app;
+        clientConfig = ctx.clientConfig;
         
         // Add error handler
         app.onError((err, c) => {
@@ -142,6 +144,32 @@ describe('UserService', () => {
             const setCookie = res.headers.get('Set-Cookie');
             expect(setCookie).toContain('redirect_to');
         });
+
+        it('should reject GitHub OAuth when registration is disabled', async () => {
+            await clientConfig.set('registration.enabled', false);
+
+            const res = await app.request('/github', {
+                method: 'GET',
+                headers: { 'Referer': 'http://localhost:5173/' }
+            }, env);
+
+            expect(res.status).toBe(403);
+            const data = await res.json() as { error: { message: string } };
+            expect(data.error.message).toBe('Registration is disabled');
+        });
+
+        it('should normalize string false when checking registration config', async () => {
+            await clientConfig.set('registration.enabled', 'false');
+
+            const res = await app.request('/github', {
+                method: 'GET',
+                headers: { 'Referer': 'http://localhost:5173/' }
+            }, env);
+
+            expect(res.status).toBe(403);
+            const data = await res.json() as { error: { message: string } };
+            expect(data.error.message).toBe('Registration is disabled');
+        });
     });
 
     describe('GET /github/callback - GitHub OAuth callback', () => {
@@ -183,6 +211,21 @@ describe('UserService', () => {
             expect(res.status).toBe(400);
             const data = await res.json() as { error: { message: string } };
             expect(data.error.message).toBe('Invalid state parameter');
+        });
+
+        it('should reject GitHub callback when registration is disabled', async () => {
+            await clientConfig.set('registration.enabled', false);
+
+            const res = await app.request('/github/callback?code=valid_code&state=mock_state', {
+                method: 'GET',
+                headers: {
+                    'Cookie': 'state=mock_state; redirect_to=http://localhost:5173/callback'
+                }
+            }, env);
+
+            expect(res.status).toBe(403);
+            const data = await res.json() as { error: { message: string } };
+            expect(data.error.message).toBe('Registration is disabled');
         });
     });
 

@@ -277,6 +277,12 @@
         "title": "启用访问量统计"
       }
     },
+    "registration": {
+      "enable": {
+        "desc": "关闭后登录页仅保留用户名密码登录，并隐藏 GitHub 登录入口。",
+        "title": "开放注册"
+      }
+    },
     "favicon": {
       "desc": "设置显示于浏览器的地址栏的图标（Favicon）",
       "title": "网站图标",

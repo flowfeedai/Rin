@@ -1,10 +1,11 @@
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { ButtonWithLoading } from "../components/button";
 import { Icon } from "../components/icon";
 import { Input } from "../components/input";
 import { client, oauth_url } from "../app/runtime";
+import { ClientConfigContext } from "../state/config";
 import { setAuthToken } from "../utils/auth";
 import { getLoginRedirectPath } from "../utils/auth-redirect";
 
@@ -15,6 +16,9 @@ export function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [, setLocation] = useLocation();
+    const config = useContext(ClientConfigContext);
+    const registrationEnabled = config.getBoolean("registration.enabled");
+    const githubLoginEnabled = registrationEnabled && authStatus.github;
 
     // Fetch auth status on mount
     useEffect(() => {
@@ -99,7 +103,7 @@ export function LoginPage() {
                 )}
 
                 {/* OAuth options */}
-                {authStatus.github && (
+                {githubLoginEnabled && (
                     <div className="flex flex-col justify-center items-center space-y-2 pt-2">
                         {authStatus.password && <p className="text-xs t-secondary">{t('login.or')}</p>}
                         {!authStatus.password && <p className="text-xs t-secondary">{t('login.oauth_only')}</p>}
@@ -112,7 +116,7 @@ export function LoginPage() {
                 )}
 
                 {/* No auth methods available */}
-                {!authStatus.github && !authStatus.password && (
+                {!githubLoginEnabled && !authStatus.password && (
                     <p className="text-sm text-red-500">{t('login.no_methods')}</p>
                 )}
             </div>
