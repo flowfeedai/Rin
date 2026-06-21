@@ -1,5 +1,7 @@
+import { useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "wouter";
+import { ClientConfigContext } from "../../../state/config";
 
 export function NavBar({
   menu,
@@ -12,6 +14,7 @@ export function NavBar({
 }) {
   const [location] = useLocation();
   const { t } = useTranslation();
+  const config = useContext(ClientConfigContext);
 
   return (
     <>
@@ -19,7 +22,7 @@ export function NavBar({
       <NavItem menu={menu} onClick={onClick} itemClassName={itemClassName} title={t("timeline")} selected={location === "/timeline"} href="/timeline" />
       <NavItem menu={menu} onClick={onClick} itemClassName={itemClassName} title={t("moments.title")} selected={location === "/moments"} href="/moments" />
       <NavItem menu={menu} onClick={onClick} itemClassName={itemClassName} title={t("hashtags")} selected={location === "/hashtags"} href="/hashtags" />
-      <NavItem menu={menu} onClick={onClick} itemClassName={itemClassName} title={t("friends.title")} selected={location === "/friends"} href="/friends" />
+      <NavItem menu={menu} onClick={onClick} itemClassName={itemClassName} title={t("friends.title")} selected={location === "/friends"} href="/friends" when={config.getBoolean("friend_apply_enable")} />
       <NavItem menu={menu} onClick={onClick} itemClassName={itemClassName} title={t("about.title")} selected={location === "/about"} href="/about" />
     </>
   );
