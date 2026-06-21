@@ -174,10 +174,13 @@ export function Markdown({ content }: { content: string }) {
         code(props) {
           const [copied, setCopied] = React.useState(false);
           const { children, className, node, ...rest } = props;
-          const match = /language-(\w+)/.exec(className || "");
+          const match = /language-([^\s]+)/.exec(className || "");
 
           const curContent = content.slice(node?.position?.start.offset || 0);
-          const isCodeBlock = curContent.trimStart().startsWith("```");
+          const trimmedContent = curContent.trimStart();
+          const isCodeBlock =
+            trimmedContent.startsWith("```") ||
+            trimmedContent.startsWith("~~~");
 
           const codeBlockStyle = {
             fontFamily: 'ui-monospace, "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
